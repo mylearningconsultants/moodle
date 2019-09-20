@@ -79,9 +79,14 @@ function completion_cron_mark_started() {
         INNER JOIN
             {course} c
          ON c.id = e.courseid
-        INNER JOIN
-            {role_assignments} ra
-         ON ra.userid = u.id
+        INNER JOIN 
+            {context} con 
+         ON con.contextlevel = ? 
+        AND con.instanceid = c.id
+        INNER JOIN 
+            {role_assignments} ra 
+         ON ra.userid = u.id 
+        AND ra.contextid = con.id
         LEFT JOIN
             {course_completions} crc
          ON crc.course = c.id
@@ -101,7 +106,7 @@ function completion_cron_mark_started() {
     ";
 
     $now = time();
-    $rs = $DB->get_recordset_sql($sql, array($now, $now, $now, $now));
+    $rs = $DB->get_recordset_sql($sql, array(CONTEXT_COURSE, $now, $now));
 
     // Check if result is empty
     if (!$rs->valid()) {
