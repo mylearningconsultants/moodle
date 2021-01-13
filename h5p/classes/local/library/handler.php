@@ -76,6 +76,26 @@ abstract class handler {
     }
 
     /**
+     * Get the base path for the current HVP Library.
+     *
+     * @param string $filepath The path within the HVP plugin
+     * @return null|string
+     */
+    public static function get_hvp_plugin_library_base(?string $filepath = null): ?string {
+        return "/mod/hvp/library/{$filepath}";
+    }
+
+    /**
+     * Get the base path for the current HVP Editor Library.
+     *
+     * @param null|string $filepath The path within the hvp plugin
+     * @return string Path to a file in the HVP Editor library.
+     */
+    public static function get_hvp_plugin_editor_library_base(?string $filepath = null): string {
+        return "/mod/hvp/editor/{$filepath}";
+    }
+
+    /**
      * Register the H5P autoloader.
      */
     public static function register(): void {
@@ -92,11 +112,21 @@ abstract class handler {
 
         $classes = static::get_class_list();
 
-        if (isset($classes[$classname])) {
-            if (file_exists($CFG->dirroot . static::get_h5p_core_library_base($classes[$classname]))) {
-                require_once($CFG->dirroot . static::get_h5p_core_library_base($classes[$classname]));
-            } else {
-                require_once($CFG->dirroot . static::get_h5p_editor_library_base($classes[$classname]));
+        if (get_config('mod_hvp', 'version')) {
+            if (isset($classes[$classname])) {
+                if (file_exists($CFG->dirroot . static::get_hvp_plugin_library_base($classes[$classname]))) {
+                    require_once($CFG->dirroot . static::get_hvp_plugin_library_base($classes[$classname]));
+                } else {
+                    require_once($CFG->dirroot . static::get_hvp_plugin_editor_library_base($classes[$classname]));
+                }
+            }
+        } else {
+            if (isset($classes[$classname])) {
+                if (file_exists($CFG->dirroot . static::get_h5p_core_library_base($classes[$classname]))) {
+                    require_once($CFG->dirroot . static::get_h5p_core_library_base($classes[$classname]));
+                } else {
+                    require_once($CFG->dirroot . static::get_h5p_editor_library_base($classes[$classname]));
+                }
             }
         }
     }
