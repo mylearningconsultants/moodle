@@ -566,7 +566,8 @@ class pdf extends TcpdfFpdi {
             $imagefilearg = \escapeshellarg($imagefile);
             $filename = \escapeshellarg($this->filename);
             $pagenoinc = \escapeshellarg($pageno + 1);
-            $command = "nice -n 19 $gsexec -q -sDEVICE=png16m -dSAFER -dBATCH -dNOPAUSE -r$imageres -dFirstPage=$pagenoinc -dLastPage=$pagenoinc ".
+            $priority = self::get_priority_function_definition();
+            $command = "$priority $gsexec -q -sDEVICE=png16m -dSAFER -dBATCH -dNOPAUSE -r$imageres -dFirstPage=$pagenoinc -dLastPage=$pagenoinc ".
                 "-dDOINTERPOLATE -dGraphicsAlphaBits=4 -dTextAlphaBits=4 -sOutputFile=$imagefilearg $filename";
 
             $output = null;
@@ -632,7 +633,8 @@ class pdf extends TcpdfFpdi {
         $gsexec = \escapeshellarg($CFG->pathtogs);
         $tempdstarg = \escapeshellarg($tempdst);
         $tempsrcarg = \escapeshellarg($tempsrc);
-        $command = "nice -n 19 $gsexec -q -sDEVICE=pdfwrite -dBATCH -dNOPAUSE -sOutputFile=$tempdstarg $tempsrcarg";
+        $priority = self::get_priority_function_definition();
+        $command = "$priority $gsexec -q -sDEVICE=pdfwrite -dBATCH -dNOPAUSE -sOutputFile=$tempdstarg $tempsrcarg";
         exec($command);
         if (!file_exists($tempdst)) {
             // Something has gone wrong in the conversion.
@@ -804,6 +806,18 @@ class pdf extends TcpdfFpdi {
         $this->SetAutoPageBreak(false, 0);
         $this->Image('@' . $imagecontent, 0, 0, $size['w'], $size['h'],
             '', '', '', false, null, '', false, false, 0);
+    }
+
+    public static function get_priority_function_definition() {
+        $windows = (strtoupper(substr(php_uname('s'), 0, 3)) === 'WIN');
+
+        if ($windows) {
+            $priorityfunc = 'start "" /Low';
+        } else {
+            $priorityfunc = 'nice -n 19';
+        }
+
+        return $priorityfunc;
     }
 }
 
