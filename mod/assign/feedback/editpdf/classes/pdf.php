@@ -566,7 +566,7 @@ class pdf extends TcpdfFpdi {
             $imagefilearg = \escapeshellarg($imagefile);
             $filename = \escapeshellarg($this->filename);
             $pagenoinc = \escapeshellarg($pageno + 1);
-            $command = "$gsexec -q -sDEVICE=png16m -dSAFER -dBATCH -dNOPAUSE -r$imageres -dFirstPage=$pagenoinc -dLastPage=$pagenoinc ".
+            $command = "nice -n 19 $gsexec -q -sDEVICE=png16m -dSAFER -dBATCH -dNOPAUSE -r$imageres -dFirstPage=$pagenoinc -dLastPage=$pagenoinc ".
                 "-dDOINTERPOLATE -dGraphicsAlphaBits=4 -dTextAlphaBits=4 -sOutputFile=$imagefilearg $filename";
 
             $output = null;
@@ -632,7 +632,7 @@ class pdf extends TcpdfFpdi {
         $gsexec = \escapeshellarg($CFG->pathtogs);
         $tempdstarg = \escapeshellarg($tempdst);
         $tempsrcarg = \escapeshellarg($tempsrc);
-        $command = "$gsexec -q -sDEVICE=pdfwrite -dBATCH -dNOPAUSE -sOutputFile=$tempdstarg $tempsrcarg";
+        $command = "nice -n 19 $gsexec -q -sDEVICE=pdfwrite -dBATCH -dNOPAUSE -sOutputFile=$tempdstarg $tempsrcarg";
         exec($command);
         if (!file_exists($tempdst)) {
             // Something has gone wrong in the conversion.
